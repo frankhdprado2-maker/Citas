@@ -1,0 +1,39 @@
+# El disco persistente necesita un servicio de pago. Revisa el precio en Render.
+services:
+  - type: web
+    name: un-plan-contigo
+    runtime: node
+    plan: 0.5c-512mb
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    disk:
+      name: agenda-excel
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 24
+      - key: DATA_DIR
+        value: /var/data
+      - key: TIME_ZONE
+        value: America/Lima
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: OWNER_EMAIL
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 465
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
+        sync: false

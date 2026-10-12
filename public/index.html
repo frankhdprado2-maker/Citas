@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf6f1">
+  <meta name="description" content="Me gustaría pasar un rato contigo y conocernos un poquito más. Elige el día y el plan.">
+  <title>Un plan contigo · Una invitación para ti</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="welcome-intro" aria-hidden="true">
+    <div class="welcome-halo"></div>
+    <div class="welcome-content">
+      <span class="welcome-sparkle sparkle-one">✧</span><span class="welcome-sparkle sparkle-two">✧</span><span class="welcome-sparkle sparkle-three">✧</span>
+      <img src="/envelope.svg" alt="" width="260" height="181">
+      <span class="welcome-label">UNA INVITACIÓN PARA TI</span>
+      <p>Un ratito para compartir</p>
+      <span class="welcome-line"></span>
+    </div>
+  </div>
+  <div class="ambient" aria-hidden="true"><span>✧</span><span>✧</span><span>✧</span><span>✧</span></div>
+  <main id="app" class="main-wrap" aria-busy="true"><section class="paper loading-card"><span class="eyebrow">UNA INVITACIÓN PARA TI</span><img class="envelope" src="/envelope.svg" alt="Una taza de café con un pequeño corazón y un calendario"><h1>Una invitación para ti</h1><p>Preparando los planes…</p></section></main>
+  <footer class="site-footer"><p>Una pequeña invitación, con ganas de verte <svg class="icon"><use href="/icons.svg#coffee"></use></svg></p></footer>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="cancel-dialog"><div class="dialog-inner"><span class="eyebrow">SIN NINGÚN PROBLEMA</span><h2>¿Cancelamos este plan?</h2><p>Se guardará como cancelado. Siempre podemos organizar otro día.</p><div class="button-row"><button class="btn secondary" id="keep-plan">Conservar el plan</button><button class="btn" id="confirm-cancel">Sí, cancelar</button></div><p id="cancel-error" class="error" role="alert" hidden></p></div></dialog>
+  <noscript><p class="error">Activa JavaScript en tu navegador para elegir y guardar el plan.</p></noscript>
+</body>
+</html>
