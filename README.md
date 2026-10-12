@@ -29,7 +29,7 @@ Necesita Node.js 22 a 24; el despliegue está configurado con Node.js 24.
 - Guardar la salida, revisar su resumen, reprogramarla o cancelarla.
 - Descargar un evento `.ics` para el calendario. Reserva dos horas como duración orientativa; puedes ajustarla en tu calendario.
 - Compartir el resumen mediante el menú del celular o copiarlo para pegarlo en WhatsApp.
-- Consultar las salidas y el estado de los avisos directamente en el archivo Excel.
+- Consultar las salidas y los avisos en una copia Excel, creada con `CONSULTAR_CITAS.cmd` o `npm.cmd run citas:excel`.
 - Indicar el correo de ella, obligatorio para agendar, y recibir una confirmación para ambos; recibir también los cambios de horario y la cancelación.
 
 Las fechas se validan en **America/Lima**. Esta zona horaria puede configurarse con `TIME_ZONE`.
@@ -40,11 +40,13 @@ La pantalla de agenda y su enlace fueron retirados por petición del usuario. La
 
 ## Dónde queda el Excel
 
-El archivo **`data/citas.xlsx` es el registro principal**, tanto para lecturas como para escrituras. Se crea automáticamente al arrancar, con la hoja `Citas`, encabezados, filtros, primera fila fija y filas alternadas en rosa. Cada fila contiene fecha, hora, plan, comida, lugar, comentario, correo de la invitada, estado del correo y marcas de registro/actualización UTC. Las columnas de control de acceso están ocultas. La hoja `Avisos` conserva destinatarios, tipo de aviso, estado, referencia del correo y los datos de cada envío. Los Excel de la versión anterior, de 13 columnas, se leen sin perder registros y se actualizan en el siguiente guardado.
+El archivo **`data/registro/citas.xlsx` es el registro principal local**, tanto para lecturas como para escrituras. Se crea automáticamente al arrancar, con la hoja `Citas`, encabezados, filtros, primera fila fija y filas alternadas en rosa. Cada fila contiene fecha, hora, plan, comida, lugar, comentario, correo de la invitada, estado del correo y marcas de registro/actualización UTC. Las columnas de control de acceso están ocultas. La hoja `Avisos` conserva destinatarios, tipo de aviso, estado, referencia del correo y los datos de cada envío. Los Excel de la versión anterior, de 13 columnas, se leen sin perder registros y se actualizan en el siguiente guardado.
 
 El servidor procesa los cambios de uno en uno y escribe primero un archivo temporal antes de reemplazar el Excel. `citas.xlsx.bak` conserva la versión anterior. No se muestra una confirmación hasta que el archivo fue guardado. Los reintentos de un mismo envío no generan citas duplicadas. El mismo día y hora exactos no admiten dos planes confirmados; no se comprueba el solapamiento por duración.
 
-Haz una copia de `data/citas.xlsx` para abrirla con Microsoft Excel. Evita mantener abierto el archivo de trabajo mientras el servidor escribe, porque Windows puede bloquearlo. Conserva los nombres y el orden de las columnas si modificas el archivo manualmente. Un archivo dañado detiene el arranque, sin sustituir los registros por una agenda vacía.
+Para revisar las citas, abre `CONSULTAR_CITAS.cmd` o ejecuta `npm.cmd run citas:excel`: se crea una copia nueva en `consultas/` que puedes abrir con Microsoft Excel sin bloquear la app. Cada copia corresponde al momento de su creación; ejecuta el comando de nuevo para ver los últimos cambios. El Excel interno se usa exclusivamente desde el servidor. Un archivo dañado detiene el arranque, sin sustituir los registros por una agenda vacía. Los bloqueos breves se reintentan; un bloqueo persistente devuelve un aviso temporal y conserva el archivo anterior sin registrar la salida como confirmada.
+
+En esta instalación se migró el registro anterior `data/citas.xlsx` a `data/registro/citas.xlsx`, conservando citas y avisos. El original se conserva como copia previa. Una instalación existente mantiene el `DATA_DIR` de su `.env`; ese valor indica la carpeta que utiliza realmente el servidor.
 
 Para recuperar la copia anterior: detén la app, conserva una copia del archivo actual y copia `citas.xlsx.bak` sobre `citas.xlsx`. Vuelve a iniciar la app y comprueba los registros. Crea respaldos periódicos del archivo y guárdalos fuera del servidor.
 

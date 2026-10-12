@@ -91,7 +91,7 @@ export async function createApp(options = {}) {
   const password = options.password || process.env.ADMIN_PASSWORD;
   const secret = options.secret || process.env.SESSION_SECRET;
   if (!password || password.length < 12 || !secret || secret.length < 32) throw new Error('Configura ADMIN_PASSWORD (12+ caracteres) y SESSION_SECRET (32+). Localmente: npm run setup.');
-  const directory = resolve(options.directory || process.env.DATA_DIR || resolve(root, 'data'));
+  const directory = resolve(options.directory || process.env.DATA_DIR || resolve(root, 'data', 'registro'));
   if (process.env.RENDER) {
     // Render no publica una variable que certifique el disco. Comprobamos el
     // punto de montaje real en Linux para evitar guardar en el sistema efímero.
@@ -213,6 +213,10 @@ export async function createApp(options = {}) {
     try { await mailer.verify(); res.json({ ok: true, message: 'Conexión y acceso al correo comprobados. No se envió ningún mensaje.' }); }
     catch { throw fail(409, 'No pudimos acceder a Gmail. Revisa la contraseña de aplicación, SMTP_USER y la conexión del servidor.'); }
   });
+  app.post('/api/admin/storage/verify', requireAdmin, async (_req, res) => {
+    await store.mutate(() => undefined);
+    res.json({ ok: true, message: 'Registro disponible para guardar las salidas.' });
+  });
   app.post('/api/admin/appointments/:id/email/retry', requireAdmin, async (req, res) => {
     await notifications.retry(req.params.id, req.body?.confirmUncertain === true);
     res.json({ ok: true });
@@ -239,7 +243,7 @@ export async function createApp(options = {}) {
   app.use((error, _req, res, _next) => {
     const status = error.status || (error.type === 'entity.parse.failed' ? 400 : 500);
     if (status >= 500) console.error('Error de agenda:', error.message);
-    res.status(status).json({ error: status >= 500 ? 'No pudimos guardar el plan. Intenta otra vez; tu confirmación aparecerá solo cuando esté guardada.' : error.message });
+    res.status(status).json({ error: error.code === 'EXCEL_LOCKED' || status < 500 ? error.message : 'No pudimos guardar el plan. Intenta otra vez; tu confirmación aparecerá solo cuando esté guardada.' });
   });
   return { app, store, notifications };
 }

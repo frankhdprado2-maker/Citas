@@ -1,6 +1,6 @@
 {
   "name": "un-plan-contigo",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "private": true,
   "description": "Una invitación en español para compartir un plan. Agenda real en Excel y despliegue en Render.",
   "type": "module",
@@ -10,8 +10,9 @@
     "dev": "node --watch server.js",
     "test": "node --test test/*.test.js",
     "setup": "node scripts/setup.js",
-    "check": "node --check server.js && node --check lib/store.js && node --check lib/email.js && node --check public/app.js && node --check scripts/check-email.js",
-    "correo:comprobar": "node scripts/check-email.js"
+    "check": "node --check server.js && node --check lib/store.js && node --check lib/email.js && node --check public/app.js && node --check scripts/check-email.js && node --check scripts/export-excel.js",
+    "correo:comprobar": "node scripts/check-email.js",
+    "citas:excel": "node scripts/export-excel.js"
   },
   "overrides": { "exceljs": { "uuid": "11.1.1" } },
   "dependencies": {

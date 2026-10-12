@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:net';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, rename } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { randomUUID, randomBytes } from 'node:crypto';
@@ -157,6 +157,40 @@ test('Exige correo al agendar y editar, conserva direcciones existentes y permit
   assert.equal((await f.request(`/api/appointments/${booking.id}`, 'GET', null, headers)).status, 200);
   assert.equal((await f.request(`/api/appointments/${booking.id}`, 'PATCH', withoutEmail, headers)).status, 400);
   assert.equal((await f.request(`/api/appointments/${booking.id}/cancel`, 'POST', null, headers)).status, 200);
+});
+
+test('Un Excel bloqueado conserva los datos y el reintento guarda una sola salida', async context => {
+  const f = await fixture(context, { configured: false, ownerEmail: 'dueno@example.com' });
+  const original = await f.store.snapshot();
+  f.store.replaceFile = async () => { throw Object.assign(new Error('Archivo abierto en Excel'), { code: 'EPERM' }); };
+  const first = payload();
+  const blocked = await f.request('/api/appointments', 'POST', first);
+  assert.equal(blocked.status, 503);
+  assert.match((await blocked.json()).error, /registro está ocupado/);
+  assert.deepEqual(await f.store.snapshot(), original);
+  assert.deepEqual(await f.store.state(), { records: [], notifications: [] });
+  f.store.replaceFile = rename;
+  assert.equal((await f.request('/api/appointments', 'POST', first)).status, 201);
+  assert.equal((await f.request('/api/appointments', 'POST', first)).status, 200);
+  assert.equal((await f.store.state()).records.length, 1);
+  assert.equal((await f.store.state()).notifications.length, 2);
+  assert.equal((await f.request('/api/admin/storage/verify', 'POST')).status, 401);
+  const beforeCheck = await f.store.state();
+  assert.equal((await f.request('/api/admin/storage/verify', 'POST', null, await f.login())).status, 200);
+  assert.deepEqual(await f.store.state(), beforeCheck);
+});
+
+test('Un bloqueo breve del archivo se recupera sin pedir otro envío ni duplicar avisos', async context => {
+  const f = await fixture(context, { configured: false, ownerEmail: 'dueno@example.com' });
+  let attempts = 0;
+  f.store.replaceFile = async (source, destination) => {
+    if (++attempts < 3) throw Object.assign(new Error('Bloqueo temporal'), { code: 'EBUSY' });
+    return rename(source, destination);
+  };
+  assert.equal((await f.request('/api/appointments', 'POST', payload())).status, 201);
+  assert.equal(attempts, 3);
+  assert.equal((await f.store.state()).records.length, 1);
+  assert.equal((await f.store.state()).notifications.length, 2);
 });
 
 test('Errores y reintentos no borran citas ni repiten destinatarios ya aceptados', async context => {
